@@ -7,6 +7,7 @@ from .models import UserProfile
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import permission_required
 from .models import Book, Author
+from .models import Library
 
 # Create your views here.
 from relationship_app.models import Author, Book, Library, Librarian
