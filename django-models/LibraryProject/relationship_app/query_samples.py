@@ -8,4 +8,4 @@ books_by_author = Book.objects.filter(author=author)
 books_in_library = Library.objects.get(name=library_name).books.all()
 
 # Retrieve the librarian for a library
-librarian_for_library = Library.objects.get(name=library_name).librarian
+librarian_for_library = Librarian.objects.get(library=Library.objects.get(name=library_name))
