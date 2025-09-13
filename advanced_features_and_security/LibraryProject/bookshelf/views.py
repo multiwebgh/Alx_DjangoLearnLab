@@ -1,34 +1,21 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import Book
-from .forms import BookForm
-from django.contrib.auth.decorators import login_required, permission_required
+from django.shortcuts import render
+from .forms import ExampleForm
 
-# listing (safe)
-@login_required
-def book_list(request):
-    # ORM used: safe from SQL injection
-    books = Book.objects.all()
-    return render(request, "bookshelf/book_list.html", {"books": books})
-
-# example create view (validated input)
-@permission_required("bookshelf.can_create", raise_exception=True)
-def create_book(request):
+def example_form_view(request):
     if request.method == "POST":
-        form = BookForm(request.POST)
+        form = ExampleForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect("book_list")
-    else:
-        form = BookForm()
-    return render(request, "bookshelf/create_book.html", {"form": form})
+            # Secure handling of cleaned data
+            name = form.cleaned_data["name"]
+            email = form.cleaned_data["email"]
+            message = form.cleaned_data["message"]
 
-# safe search example (use forms or clean input)
-def search_books(request):
-    q = request.GET.get("q", "").strip()
-    # validate length and characters if needed
-    if len(q) > 0:
-        # use ORM filtering; avoids raw SQL and injection
-        books = Book.objects.filter(title__icontains=q)
+            # For now, just return success page
+            return render(request, "bookshelf/form_example.html", {
+                "form": ExampleForm(), 
+                "success": True
+            })
     else:
-        books = Book.objects.none()
-    return render(request, "bookshelf/search_results.html", {"books": books, "query": q})
+        form = ExampleForm()
+
+    return render(request, "bookshelf/form_example.html", {"form": form})
