@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from .forms import ExampleForm
+from .models import Book
 
 def example_form_view(request):
     if request.method == "POST":
@@ -19,3 +20,11 @@ def example_form_view(request):
         form = ExampleForm()
 
     return render(request, "bookshelf/form_example.html", {"form": form})
+
+
+
+
+def book_list(request):
+    books = Book.objects.all()
+    return render(request, "bookshelf/book_list.html", {"books": books})
+
