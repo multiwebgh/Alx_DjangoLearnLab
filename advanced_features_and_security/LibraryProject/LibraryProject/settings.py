@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-qpha^!@ufrfte!x_tia#q-*k*ofncp$x&8cgdywyez%66l5t05'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["yourdomain.com", "www.yourdomain.com", "127.0.0.1", "localhost"]
 
 
 # Application definition
@@ -130,3 +130,30 @@ LOGOUT_REDIRECT_URL = "login"
 
 AUTH_USER_MODEL = "relationship_app.CustomUser"
 AUTH_USER_MODEL = "bookshelf.CustomUser"
+
+
+
+# HTTPS / Cookies
+CSRF_COOKIE_SECURE = True       # only send CSRF cookie over HTTPS
+SESSION_COOKIE_SECURE = True    # only send session cookie over HTTPS
+SESSION_COOKIE_HTTPONLY = True  # not accessible to JS
+CSRF_COOKIE_HTTPONLY = False    # usually False, so templates can still read it for ajax if needed
+
+# Browser protections
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = "DENY"  # or "SAMEORIGIN" if you need iframe from same origin
+
+# HSTS (only enable after you have HTTPS configured)
+SECURE_HSTS_SECONDS = 31536000  # 1 year; use 0 while testing
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+# Redirect all HTTP to HTTPS (requires webserver / correct proxy settings)
+SECURE_SSL_REDIRECT = True
+
+# Content Security Policy (if using django-csp — see below)
+# CSP settings will be added if you choose django-csp method
+MIDDLEWARE.insert(0, "LibraryProject.middleware.ContentSecurityPolicyMiddleware")
+SECURE_REFERRER_POLICY = "no-referrer-when-downgrade"  # or 'strict-origin-when-cross-origin'
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # if behind proxy

@@ -1,21 +1,34 @@
-from django.shortcuts import render
-from django.http import HttpResponse
-from django.contrib.auth.decorators import permission_required
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import Book
+from .forms import BookForm
+from django.contrib.auth.decorators import login_required, permission_required
 
-@permission_required('bookshelf.can_view', raise_exception=True)
-def book_list(request):   # <-- use book_list instead of view_books
+# listing (safe)
+@login_required
+def book_list(request):
+    # ORM used: safe from SQL injection
     books = Book.objects.all()
-    return render(request, 'bookshelf/book_list.html', {'books': books})
+    return render(request, "bookshelf/book_list.html", {"books": books})
 
-@permission_required('bookshelf.can_create', raise_exception=True)
+# example create view (validated input)
+@permission_required("bookshelf.can_create", raise_exception=True)
 def create_book(request):
-    return HttpResponse("You can create a book here.")
+    if request.method == "POST":
+        form = BookForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("book_list")
+    else:
+        form = BookForm()
+    return render(request, "bookshelf/create_book.html", {"form": form})
 
-@permission_required('bookshelf.can_edit', raise_exception=True)
-def edit_book(request, book_id):
-    return HttpResponse(f"You can edit book with ID {book_id} here.")
-
-@permission_required('bookshelf.can_delete', raise_exception=True)
-def delete_book(request, book_id):
-    return HttpResponse(f"You can delete book with ID {book_id} here.")
+# safe search example (use forms or clean input)
+def search_books(request):
+    q = request.GET.get("q", "").strip()
+    # validate length and characters if needed
+    if len(q) > 0:
+        # use ORM filtering; avoids raw SQL and injection
+        books = Book.objects.filter(title__icontains=q)
+    else:
+        books = Book.objects.none()
+    return render(request, "bookshelf/search_results.html", {"books": books, "query": q})
