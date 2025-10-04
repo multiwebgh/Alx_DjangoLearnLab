@@ -1,14 +1,10 @@
 {% extends 'base.html' %}
-{% block title %}{% if view.action == 'create' %}New Post{% else %}Edit Post{% endif %} | Django Blog{% endblock %}
-
 {% block content %}
-<h1>{% if view.action == 'create' %}Create New Post{% else %}Edit Post{% endif %}</h1>
-
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">{% if view.action == 'create' %}Publish{% else %}Save changes{% endif %}</button>
-</form>
-
-<p><a href="{% url 'posts' %}">Back to posts</a></p>
+  <h2>{% if object %}Edit Post{% else %}Create Post{% endif %}</h2>
+  <form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+  </form>
+  <a href="{% url 'posts' %}">Cancel</a>
 {% endblock %}
