@@ -1,32 +1,23 @@
-from rest_framework import viewsets, permissions
-from .models import Post, Comment
-from .serializers import PostSerializer, CommentSerializer
+# posts/views.py
+from rest_framework import generics, permissions
+from rest_framework.pagination import PageNumberPagination
+from django.contrib.auth import get_user_model
+from .models import Post
+from .serializers import PostSerializer
 
-# Permission to allow only owners to edit/delete
-class IsOwnerOrReadOnly(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        # Read-only permissions for safe methods
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        # Write permissions only for the owner
-        return obj.author == request.user
+User = get_user_model()
 
+class FeedPagination(PageNumberPagination):
+    page_size = 10
 
-# ViewSet for Posts
-class PostViewSet(viewsets.ModelViewSet):
-    queryset = Post.objects.all()
+class FeedView(generics.ListAPIView):
     serializer_class = PostSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = FeedPagination
 
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
-
-
-# ViewSet for Comments
-class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
-    serializer_class = CommentSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
-
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+    def get_queryset(self):
+        user = self.request.user
+        # Authors the user follows
+        following_qs = user.following.all()
+        # Posts by authors the user follows, ordered newest first
+        return Post.objects.filter(author__in=following_qs).order_by('-created_at')
