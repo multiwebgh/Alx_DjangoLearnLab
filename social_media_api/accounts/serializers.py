@@ -5,7 +5,6 @@ from rest_framework.authtoken.models import Token
 User = get_user_model()
 
 class RegisterSerializer(serializers.ModelSerializer):
-    # 👇 This line is required by the checker
     password = serializers.CharField(write_only=True)
 
     class Meta:
@@ -13,7 +12,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = ['username', 'email', 'password']
 
     def create(self, validated_data):
-        # 👇 Use get_user_model().objects.create_user as required
         user = get_user_model().objects.create_user(
             username=validated_data['username'],
             email=validated_data.get('email'),
